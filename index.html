@@ -11,17 +11,10 @@
   <body>
     <nav>
       <div id="nav_all">
-        <h1 class="highlighted">All Todos <span id="all_todo_count">2</span></h1>
-        <ul>
-          <li><p>No Due Date <span id=>1</span></p></li>
-          <li><p>06/17 <span id=>1</span></p></li>
-        </ul>
+        <h1 id="all" class="highlighted list_view">All Todos <span id="list_todo_count">2</span></h1>
       </div>
       <div id="nav_completed">
-        <h1>Completed <span id="completed_todo_count">1</span></h1>
-        <ul>
-          <li class="completed"><p>06/17 <span>1</span></p></li>
-        </ul>
+        <h1 id="completed" class="list_view">Completed <span id="completed_todo_count">1</span></h1>
       </div>
     </nav>
     <main>
@@ -124,6 +117,13 @@
         </div>
         <img class="trash" src="https://d3905n0khyu9wc.cloudfront.net/assessment/todo-js/images/trash.png"</img>
       </li>
+      {{/each}}
+    </ul>
+  </script>
+  <script id="nav_lists_template" type="text/x-handlebars-template">
+    <ul>
+      {{#each lists}}
+      <li id="{{listName}}" class="{{completed}} list_view"><p>{{listName}}<span id=>{{listLength}}</span></p></li>
       {{/each}}
     </ul>
   </script>

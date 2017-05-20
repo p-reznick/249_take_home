@@ -8,7 +8,7 @@ var ToDo = {
   dueDateStr: '',
   getDueDateStr: function(month, year) {
     if (month !== null && year !== null) {
-      return (month + '/' + year);
+      return (month + '_' + year);
     } else {
       return "No Due Date";
     }
@@ -20,7 +20,7 @@ var ToDo = {
     this.year = year;
     this.description = description;
     this.completed = '';
-    dueDateStr = this.getDueDateStr(month, year);
+    this.dueDateStr = this.getDueDateStr(month, year);
     this.id = id;
     return this;
   }
@@ -76,14 +76,17 @@ application = {
     $(document).on('click', '.trash', this.handleToDoDeletion.bind(this));
     $(document).on('click', '.mark_complete_link', this.markComplete.bind(this));
     $(document).on('click', '.checkbox', this.handleCheckBox.bind(this));
+    $('nav').on('click', this.handleCurrentListChange.bind(this));
   },
   createTemplates: function() {
     this.mainListTemplate = Handlebars.compile($('#main_list_template').html());
-
+    this.navListsTemplate = Handlebars.compile($('#nav_lists_template').html());
   },
   updatePage: function() {
-    // update all lists in nav (need new template)
-    // update all list count numbers
+    $('#' + this.state.currentListView).addClass('highlighted');
+    this.sortToDos();
+    this.displayNavLists();
+    // update list counts on page
     this.displayMainList();
   },
   displayMainList: function() {
@@ -93,6 +96,34 @@ application = {
     var toDoListHTML = this.mainListTemplate({ toDos: toDoList });
     $('main ul').remove();
     $('main').append(toDoListHTML);
+  },
+  displayNavLists: function() {
+    $('#nav_all ul').remove();
+    $('#nav_completed ul').remove();
+    var listNames = Object.keys(this.state.toDos).filter(function(listName) {
+      return !(['all', 'completed'].includes(listName));
+    });
+    var self = this;
+
+    var completedListNames = listNames.filter(function(listName) {
+      return self.areAllComplete(self.state.toDos[listName]);
+    });
+
+    var allListObjects = listNames.map(function(name) {
+      return { listName: name,
+               listLength: self.state.toDos[name].length,
+               completed: self.state.toDos[name].completed };
+    });
+
+    var completedListObjects = completedListNames.map(function(name) {
+      return { listName: name,
+               listLength: self.state.toDos[name].length,
+               completed: "completed" };
+    });
+
+
+    $('#nav_all').append(this.navListsTemplate({ lists: allListObjects }));
+    $('#nav_completed').append(this.navListsTemplate({ lists: completedListObjects }));
   },
   displayModal: function(toDoID) {
     if (toDoID) {
@@ -114,7 +145,9 @@ application = {
     }
   },
   handleAddToDo: function(e) {
-    $('#modal').attr('data-status', 'add');
+    $('#modal input').val('');
+    $('#modal select').val('');
+    $('#modal textarea').val('');
     this.displayModal();
   },
   handleEditToDo: function(e) {
@@ -149,11 +182,23 @@ application = {
 
     this.exitModal();
   },
+  handleCurrentListChange: function(e) {
+    var $target = $(e.target);
+
+    if ($target.hasClass('list_view') || $target.closest('li').hasClass('list_view')) {
+      
+
+      this.state.currentListView = $target.attr('id') || $target.closest('li').attr('id');
+      $('nav .highlighted').removeClass('highlighted');
+
+      this.saveState();
+      this.updatePage();
+    }
+  },
   addToDo: function(title, day, month, year, description) {
     var newToDo = makeToDo(title, day, month, year, description);
 
     this.state.toDos.all.push(newToDo);
-    this.sortToDos();
     this.saveState();
     this.updatePage();
   },
@@ -183,21 +228,17 @@ application = {
     this.sortToDos();
   },
   sortToDos: function() {
-    this.clearDateLists();
+    this.clearSecondaryLists();
 
     this.state.toDos.all.forEach(this.distributeToDo.bind(this));
     this.saveState();
-    this.updatePage();
   },
-  clearDateLists: function() {
-    var listNames = Object.keys(this.state.toDos);
-    var self = this;
-
-    listNames.forEach(function(listName) {
-      if (!['all', 'completed'].includes(listName)) {
-        self.state.toDos[listName] = undefined;
-      }
-    });
+  clearSecondaryLists: function() {
+    var allTodos = this.state.toDos['all'];
+    this.state.toDos = {
+      all: allTodos,
+      completed: [],
+    }
   },
   distributeToDo: function(toDo) {
     var lists = this.state.toDos;
@@ -240,17 +281,29 @@ application = {
   },
   markComplete: function(e) {
     e.preventDefault();
-    var toDoID = $(e.target).closest('li').data('id');
+    var toDoID;
+
+    if ($(e.target).attr('class') === 'checkbox') {
+      toDoID = $(e.target).closest('li').data('id');
+    } else if ($(e.target).attr('class') === 'mark_complete_link') {
+      toDoID = $(e.target).closest('div#modal').data('edit-id');
+    }
 
     this.getToDo(toDoID).completed = 'completed';
-    this.sortToDos();
+    this.updatePage();
+    this.exitModal();
   },
   markIncomplete: function(e) {
     e.preventDefault();
     var toDoID = $(e.target).closest('li').data('id');
 
     this.getToDo(toDoID).completed = '';
-    this.sortToDos();
+    this.updatePage();
+  },
+  areAllComplete: function(list) {
+    return list.every(function(toDo) {
+      return toDo.completed === 'completed';
+    });
   }
 };
 
