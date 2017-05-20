@@ -10,15 +10,15 @@
   </head>
   <body>
     <nav>
-      <div id="nav_all">
-        <h1 id="all" class="highlighted list_view">All Todos <span id="list_todo_count">2</span></h1>
+      <div id="all" class="list_view_item">
+        <h1>All Todos <span id="all_count">2</span></h1>
       </div>
-      <div id="nav_completed">
-        <h1 id="completed" class="list_view">Completed <span id="completed_todo_count">1</span></h1>
+      <div id="completed" class="list_view_item">
+        <h1 id="completed">Completed <span id="completed_count">1</span></h1>
       </div>
     </nav>
     <main>
-      <h2 id="list_title">All Todos <span id="list_todo_count">2</span></h2>
+      <h2><span id="main_list_title">All Todos</span><span id="main_list_count">2</span></h2>
       <a id="add_new_todo" href="#">Add new todo</a>
     </main>
     <div id="modal">
@@ -123,7 +123,9 @@
   <script id="nav_lists_template" type="text/x-handlebars-template">
     <ul>
       {{#each lists}}
-      <li id="{{listName}}" class="{{completed}} list_view"><p>{{listName}}<span id=>{{listLength}}</span></p></li>
+      <li id="{{listName}}{{completed}}" class="{{completed}} list_view_item">
+        <p>{{listName}}<span>{{listLength}}</span></p>
+      </li>
       {{/each}}
     </ul>
   </script>

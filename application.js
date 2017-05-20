@@ -8,7 +8,7 @@ var ToDo = {
   dueDateStr: '',
   getDueDateStr: function(month, year) {
     if (month !== null && year !== null) {
-      return (month + '_' + year);
+      return (month + '/' + year);
     } else {
       return "No Due Date";
     }
@@ -76,30 +76,45 @@ application = {
     $(document).on('click', '.trash', this.handleToDoDeletion.bind(this));
     $(document).on('click', '.mark_complete_link', this.markComplete.bind(this));
     $(document).on('click', '.checkbox', this.handleCheckBox.bind(this));
-    $('nav').on('click', this.handleCurrentListChange.bind(this));
+    $(document).on('click', '.list_view_item', this.handleCurrentListChange.bind(this));
   },
   createTemplates: function() {
     this.mainListTemplate = Handlebars.compile($('#main_list_template').html());
     this.navListsTemplate = Handlebars.compile($('#nav_lists_template').html());
   },
   updatePage: function() {
-    $('#' + this.state.currentListView).addClass('highlighted');
     this.sortToDos();
     this.displayNavLists();
-    // update list counts on page
+    this.highlightCurrentView();
     this.displayMainList();
   },
   displayMainList: function() {
     var view = this.state.currentListView;
 
+    if (view.match(/\d{2}\/\d{2}completed/)) {
+      view = view.slice(0, 5);
+    }
+
     var toDoList = this.state.toDos[view];
     var toDoListHTML = this.mainListTemplate({ toDos: toDoList });
+    var title = this.state.currentListView;
+
+    if (title === 'all') {
+      title = "All Todos";
+    } else if (title === 'completed') {
+      title = 'Completed';
+    } else if (title.match(/\d{2}\/\d{2}completed/)) {
+      title = title.slice(0, 5);
+    }
+
+    $('#main_list_title').text(title);
+    $('#main_list_count').text(this.state.toDos[view].length);
     $('main ul').remove();
     $('main').append(toDoListHTML);
   },
   displayNavLists: function() {
-    $('#nav_all ul').remove();
-    $('#nav_completed ul').remove();
+    $('#all ul').remove();
+    $('#completed ul').remove();
     var listNames = Object.keys(this.state.toDos).filter(function(listName) {
       return !(['all', 'completed'].includes(listName));
     });
@@ -109,6 +124,7 @@ application = {
       return self.areAllComplete(self.state.toDos[listName]);
     });
 
+    // ADD FUNCTION FOR THIS
     var allListObjects = listNames.map(function(name) {
       return { listName: name,
                listLength: self.state.toDos[name].length,
@@ -121,9 +137,11 @@ application = {
                completed: "completed" };
     });
 
+    $('#all_count').text(listNames.length);
+    $('#completed_count').text(completedListNames.length);
 
-    $('#nav_all').append(this.navListsTemplate({ lists: allListObjects }));
-    $('#nav_completed').append(this.navListsTemplate({ lists: completedListObjects }));
+    $('#all').append(this.navListsTemplate({ lists: allListObjects }));
+    $('#completed').append(this.navListsTemplate({ lists: completedListObjects }));
   },
   displayModal: function(toDoID) {
     if (toDoID) {
@@ -183,16 +201,17 @@ application = {
     this.exitModal();
   },
   handleCurrentListChange: function(e) {
-    var $target = $(e.target);
+    var newListView = $(e.target).closest('.list_view_item').attr('id');
+    this.state.currentListView = newListView;
 
-    if ($target.hasClass('list_view') || $target.closest('li').hasClass('list_view')) {
-      
-
-      this.state.currentListView = $target.attr('id') || $target.closest('li').attr('id');
-      $('nav .highlighted').removeClass('highlighted');
-
-      this.saveState();
-      this.updatePage();
+    this.updatePage();
+  },
+  handleCheckBox: function(e) {
+    var checked = $(e.target).closest('li').attr('class') === 'completed';
+    if (checked) {
+      this.markIncomplete(e);
+    } else {
+      this.markComplete(e);
     }
   },
   addToDo: function(title, day, month, year, description) {
@@ -229,7 +248,6 @@ application = {
   },
   sortToDos: function() {
     this.clearSecondaryLists();
-
     this.state.toDos.all.forEach(this.distributeToDo.bind(this));
     this.saveState();
   },
@@ -271,14 +289,6 @@ application = {
     this.saveState();
     this.updatePage();
   },
-  handleCheckBox: function(e) {
-    var checked = $(e.target).closest('li').attr('class') === 'completed';
-    if (checked) {
-      this.markIncomplete(e);
-    } else {
-      this.markComplete(e);
-    }
-  },
   markComplete: function(e) {
     e.preventDefault();
     var toDoID;
@@ -304,6 +314,17 @@ application = {
     return list.every(function(toDo) {
       return toDo.completed === 'completed';
     });
+  },
+  highlightCurrentView: function() {
+    $('.highlighted').removeClass('highlighted');
+    var query = "#" + this.state.currentListView.replace("/", "\\/");
+    var elem = $(query)[0];
+
+    if (elem.tagName === 'LI') {
+      $(elem).addClass('highlighted');
+    } else {
+      $(elem).find('h1').addClass('highlighted');
+    }
   }
 };
 
