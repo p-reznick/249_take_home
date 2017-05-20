@@ -1,0 +1,130 @@
+<!DOCTYPE=html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <title>Peter's Todo Lists</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.8/handlebars.min.js"></script>
+    <script src="./application.js"></script>
+    <link rel="stylesheet" href="./main.css">
+  </head>
+  <body>
+    <nav>
+      <div id="nav_all">
+        <h1 class="highlighted">All Todos <span id="all_todo_count">2</span></h1>
+        <ul>
+          <li><p>No Due Date <span id=>1</span></p></li>
+          <li><p>06/17 <span id=>1</span></p></li>
+        </ul>
+      </div>
+      <div id="nav_completed">
+        <h1>Completed <span id="completed_todo_count">1</span></h1>
+        <ul>
+          <li class="completed"><p>06/17 <span>1</span></p></li>
+        </ul>
+      </div>
+    </nav>
+    <main>
+      <h2 id="list_title">All Todos <span id="list_todo_count">2</span></h2>
+      <a id="add_new_todo" href="#">Add new todo</a>
+    </main>
+    <div id="modal">
+      <form action="#" method="get">
+        <dl>
+          <dt><label for="title">Title</label></dt>
+          <dd><input id="title" type="text" placeholder="Title"></dd>
+          <dt><label for="due_date">Due Date</label></dt>
+          <dd id="date_input_holder">
+            <select id="day" name="day">
+              <option value='' disabled="disabled" selected="selected">Day</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+              <option value="16">16</option>
+              <option value="17">17</option>
+              <option value="18">18</option>
+              <option value="19">19</option>
+              <option value="20">20</option>
+              <option value="21">21</option>
+              <option value="22">22</option>
+              <option value="23">23</option>
+              <option value="24">24</option>
+              <option value="25">25</option>
+              <option value="26">26</option>
+              <option value="27">27</option>
+              <option value="28">28</option>
+              <option value="29">29</option>
+              <option value="30">30</option>
+              <option value="31">31</option>
+            </select>
+            <span>/</span>
+            <select id="month" name="month">
+              <option value='' disabled="disabled" selected="selected">Month</option>
+              <option value="01">January</option>
+              <option value="02">February</option>
+              <option value="03">March</option>
+              <option value="04">April</option>
+              <option value="05">May</option>
+              <option value="06">June</option>
+              <option value="07">July</option>
+              <option value="08">August</option>
+              <option value="09">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+            <span>/</span>
+            <select id="year" name="year">
+              <option value='' disabled="disabled" selected="selected">Year</option>
+              <option value="14">2014</option>
+              <option value="15">2015</option>
+              <option value="16">2016</option>
+              <option value="17">2017</option>
+              <option value="18">2018</option>
+              <option value="19">2019</option>
+              <option value="20">2020</option>
+              <option value="21">2021</option>
+              <option value="22">2022</option>
+              <option value="23">2023</option>
+              <option value="24">2024</option>
+              <option value="25">2025</option>
+            </select>
+          </dd>
+          <dt><label for='description'>Description</dt>
+          <dd>
+            <textarea id="description" name="description" placeholder="Description"></textarea>
+          </dd>
+        </dl>
+        <div class="button_holder">
+          <button type="submit">Save</button>
+          <a class="mark_complete_link" href="#">Mark as Complete</a>
+        </div>
+      </form>
+    </div>
+  </body>
+  <script id="main_list_template" type="text/x-handlebars-template">
+    <ul>
+      {{#each toDos}}
+      <li data-id="{{id}}" class="{{completed}}">
+        <div>
+          <img class="checkbox" src="https://d3905n0khyu9wc.cloudfront.net/assessment/todo-js/images/checkbox.png"></img>
+          <a class="todo_list_link" href="#">{{title}} - {{dueDateStr}}</a>
+        </div>
+        <img class="trash" src="https://d3905n0khyu9wc.cloudfront.net/assessment/todo-js/images/trash.png"</img>
+      </li>
+      {{/each}}
+    </ul>
+  </script>
+</html>
