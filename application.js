@@ -115,33 +115,26 @@ application = {
   displayNavLists: function() {
     $('#all ul').remove();
     $('#completed ul').remove();
+    var self = this;
+
     var listNames = Object.keys(this.state.toDos).filter(function(listName) {
       return !(['all', 'completed'].includes(listName));
     });
-    var self = this;
 
     var completedListNames = listNames.filter(function(listName) {
       return self.areAllComplete(self.state.toDos[listName]);
     });
 
     // ADD FUNCTION FOR THIS
-    var allListObjects = listNames.map(function(name) {
-      return { listName: name,
-               listLength: self.state.toDos[name].length,
-               completed: self.state.toDos[name].completed };
-    });
 
-    var completedListObjects = completedListNames.map(function(name) {
-      return { listName: name,
-               listLength: self.state.toDos[name].length,
-               completed: "completed" };
-    });
+    var allListObject = this.getTemplateListObject(listNames, false);
+    var completedListObject = this.getTemplateListObject(completedListNames, true);
 
     $('#all_count').text(listNames.length);
     $('#completed_count').text(completedListNames.length);
 
-    $('#all').append(this.navListsTemplate({ lists: allListObjects }));
-    $('#completed').append(this.navListsTemplate({ lists: completedListObjects }));
+    $('#all').append(this.navListsTemplate(allListObject));
+    $('#completed').append(this.navListsTemplate(completedListObject));
   },
   displayModal: function(toDoID) {
     if (toDoID) {
@@ -249,6 +242,7 @@ application = {
   sortToDos: function() {
     this.clearSecondaryLists();
     this.state.toDos.all.forEach(this.distributeToDo.bind(this));
+    this.state.toDos.all = this.sortToDoList(this.state.toDos.all);
     this.saveState();
   },
   clearSecondaryLists: function() {
@@ -264,7 +258,11 @@ application = {
       lists.completed.push(toDo);
     }
 
-    lists[toDo.dueDateStr] ? lists[toDo.dueDateStr].push(toDo) : (lists[toDo.dueDateStr] = [toDo]);
+    if (lists[toDo.dueDateStr]) {
+      toDo.completed === 'completed' ? lists[toDo.dueDateStr].push(toDo) : lists[toDo.dueDateStr].unshift(toDo);
+    } else {
+      (lists[toDo.dueDateStr] = [toDo]);
+    }
   },
   getToDo: function(id) {
     var match;
@@ -324,6 +322,46 @@ application = {
       $(elem).addClass('highlighted');
     } else {
       $(elem).find('h1').addClass('highlighted');
+    }
+  },
+  sortToDoList: function(list) {
+    var newList = [];
+    list.forEach(function(toDo) {
+      toDo.completed === 'completed' ? newList.push(toDo) : newList.unshift(toDo);
+    });
+    return newList;
+  },
+  getTemplateListObject: function(listNames, completed) {
+    var completed = completed ? 'completed' : '';
+    var self = this;
+
+    listNames = listNames.sort(this.sortDueDateStrs);
+
+    var objects = listNames.map(function(name) {
+      return { listName: name,
+               listLength: self.state.toDos[name].length,
+               completed: completed };
+    });
+    console.log(listNames);
+    console.log(objects);
+    return { lists: objects };
+  },
+  sortDueDateStrs: function(a, b) {
+    var aYear = a.slice(3, 5);
+    var aMonth = a.slice(0, 2);
+    var bYear = b.slice(3, 5);
+    var bMonth = b.slice(0, 2);
+
+    if (aYear > bYear) {
+      return 1;
+    } else if (aYear < bYear) {
+      return -1
+    } else if (aMonth > bMonth) {
+      return 1;
+    } else if (aMonth < bMonth) {
+      return -1;
+    } else {
+      return 0;
     }
   }
 };

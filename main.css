@@ -78,6 +78,10 @@ nav .highlighted {
   background-color: #383f5f;
 }
 
+nav .highlighted p {
+  color: #fff;
+}
+
 nav .highlighted span {
   background-color: #148fd5;
   color: #fff;
@@ -174,8 +178,8 @@ main .checkbox {
 }
 
 main .completed .checkbox {
-  content: url('https://d3905n0khyu9wc.cloudfront.net/assessment/todo-js/images/completed.png');
-  background-color: #f00;
+  content: url('https://d3905n0khyu9wc.cloudfront.net/assessment/todo-js/images/checked.png');
+  background-color: #fff;
 }
 
 main h2 {
