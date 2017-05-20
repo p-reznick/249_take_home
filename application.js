@@ -76,6 +76,7 @@ application = {
     $(document).on('click', '.trash', this.handleToDoDeletion.bind(this));
     $(document).on('click', '.mark_complete_link', this.markComplete.bind(this));
     $(document).on('click', '.checkbox', this.handleCheckBox.bind(this));
+    $(document).on('click', 'main li', this.handleCheckBox.bind(this));
     $(document).on('click', '.list_view_item', this.handleCurrentListChange.bind(this));
   },
   createTemplates: function() {
@@ -83,10 +84,11 @@ application = {
     this.navListsTemplate = Handlebars.compile($('#nav_lists_template').html());
   },
   updatePage: function() {
+    // this.resetModal();
     this.sortToDos();
     this.displayNavLists();
-    this.highlightCurrentView();
     this.displayMainList();
+    this.highlightCurrentView();
   },
   displayMainList: function() {
     var view = this.state.currentListView;
@@ -117,6 +119,8 @@ application = {
     $('#completed ul').remove();
     var self = this;
 
+    // FUNCTION FOR THIS ?
+
     var listNames = Object.keys(this.state.toDos).filter(function(listName) {
       return !(['all', 'completed'].includes(listName));
     });
@@ -124,8 +128,6 @@ application = {
     var completedListNames = listNames.filter(function(listName) {
       return self.areAllComplete(self.state.toDos[listName]);
     });
-
-    // ADD FUNCTION FOR THIS
 
     var allListObject = this.getTemplateListObject(listNames, false);
     var completedListObject = this.getTemplateListObject(completedListNames, true);
@@ -191,6 +193,8 @@ application = {
       this.editToDo(title, day, month, year, description, editID);
     }
 
+    this.state.currentListView = 'all';
+    this.updatePage();
     this.exitModal();
   },
   handleCurrentListChange: function(e) {
@@ -201,6 +205,7 @@ application = {
   },
   handleCheckBox: function(e) {
     var checked = $(e.target).closest('li').attr('class') === 'completed';
+
     if (checked) {
       this.markIncomplete(e);
     } else {
@@ -215,12 +220,15 @@ application = {
     this.updatePage();
   },
   editToDo: function(title, day, month, year, description, id) {
+    var completed = this.getToDo(id).completed;
+
     editedToDo = {
       title: title,
       day: day,
       month: month,
       year: year,
       description: description,
+      completed: completed,
       dueDateStr: month + '/' + year,
       id: id,
     };
@@ -291,6 +299,10 @@ application = {
     e.preventDefault();
     var toDoID;
 
+    if ($('#modal').attr('data-edit-id') === '-1') {
+      return alert('Cannot mark as complete as item has not been created yet!');
+    }
+
     if ($(e.target).attr('class') === 'checkbox') {
       toDoID = $(e.target).closest('li').data('id');
     } else if ($(e.target).attr('class') === 'mark_complete_link') {
@@ -303,10 +315,12 @@ application = {
   },
   markIncomplete: function(e) {
     e.preventDefault();
-    var toDoID = $(e.target).closest('li').data('id');
+    if (e.target.tagName !== 'A') {
+      var toDoID = $(e.target).closest('li').data('id');
 
-    this.getToDo(toDoID).completed = '';
-    this.updatePage();
+      this.getToDo(toDoID).completed = '';
+      this.updatePage();
+    }
   },
   areAllComplete: function(list) {
     return list.every(function(toDo) {
@@ -315,9 +329,15 @@ application = {
   },
   highlightCurrentView: function() {
     $('.highlighted').removeClass('highlighted');
-    var query = "#" + this.state.currentListView.replace("/", "\\/");
-    var elem = $(query)[0];
+    var view = this.state.currentListView;
+    var query;
+    if (view === 'No Due Date') {
+      query = ("[id='No Due Date']");
+    } else {
+      query = "#" + view.replace("/", "\\/");
+    }
 
+    var elem = $(query)[0];
     if (elem.tagName === 'LI') {
       $(elem).addClass('highlighted');
     } else {
@@ -342,8 +362,6 @@ application = {
                listLength: self.state.toDos[name].length,
                completed: completed };
     });
-    console.log(listNames);
-    console.log(objects);
     return { lists: objects };
   },
   sortDueDateStrs: function(a, b) {
