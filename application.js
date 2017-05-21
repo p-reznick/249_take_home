@@ -109,9 +109,9 @@ application = {
     var toDoList = this.state.toDos[view];
     var toDoListHTML = this.mainListTemplate({ toDos: toDoList });
     var title = this.state.currentListView;
-
+    console.log(title);
     title = this.getPrettifiedTitle(title);
-
+    console.log(title);
     $('#main_list_title').text(title);
     $('#main_list_count').text(this.getListCount(view));
     $('main ul').remove();
@@ -400,7 +400,7 @@ application = {
       newTitle = title.slice(0, 11);
     }
 
-    return newTitle;
+    return newTitle || title;
   },
   sortDueDateStrs: function(a, b) {
     var aYear = a.slice(3, 5);
