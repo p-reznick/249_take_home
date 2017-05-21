@@ -110,15 +110,7 @@ application = {
     var toDoListHTML = this.mainListTemplate({ toDos: toDoList });
     var title = this.state.currentListView;
 
-    if (title === 'all') {
-      title = "All Todos";
-    } else if (title === 'completed') {
-      title = 'Completed';
-    } else if (title.match(/\d{2}\/\d{2}completed/)) {
-      title = title.slice(0, 5);
-    } else if (title.match(/No Due Datecompleted/)) {
-      title = title.slice(0, 11);
-    }
+    title = this.getPrettifiedTitle(title);
 
     $('#main_list_title').text(title);
     $('#main_list_count').text(this.getListCount(view));
@@ -313,9 +305,8 @@ application = {
     var toDoID;
 
     if ($('#modal').attr('data-edit-id') === '-1') {
-      return alert('Cannot mark as complete as item has not been created yet!');
-    }
-
+      alert('Cannot mark as complete as item has not been created yet!');
+    } else {
       if ($(e.target).attr('class') === 'checkbox') {
         toDoID = $(e.target).closest('li').data('id');
       } else if ($(e.target).attr('class') === 'mark_complete_link') {
@@ -324,9 +315,10 @@ application = {
         toDoID = $(e.target).closest('li').attr('data-id');
       }
 
-    this.getToDo(toDoID).completed = 'completed';
-    this.updatePage();
-    this.exitModal();
+      this.getToDo(toDoID).completed = 'completed';
+      this.updatePage();
+      this.exitModal();
+    }
   },
   markIncomplete: function(e) {
     e.preventDefault();
@@ -394,6 +386,21 @@ application = {
     });
 
     return { lists: objects };
+  },
+  getPrettifiedTitle: function(title) {
+    var newTitle;
+
+    if (title === 'all') {
+      newTitle = "All Todos";
+    } else if (title === 'completed') {
+      newTitle = 'Completed';
+    } else if (title.match(/\d{2}\/\d{2}completed/)) {
+      newTitle = title.slice(0, 5);
+    } else if (title.match(/No Due Datecompleted/)) {
+      newTitle = title.slice(0, 11);
+    }
+
+    return newTitle;
   },
   sortDueDateStrs: function(a, b) {
     var aYear = a.slice(3, 5);
