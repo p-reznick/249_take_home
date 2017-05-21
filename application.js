@@ -77,7 +77,7 @@ application = {
     $(document).on('click', '.trash', this.handleToDoDeletion.bind(this));
     $(document).on('click', '.mark_complete_link', this.markComplete.bind(this));
     $(document).on('click', '.checkbox', this.handleMarkAction.bind(this));
-    $(document).on('click', 'main li', this.handleMarkAction.bind(this));
+    $(document).on('click', '.main_list_item', this.handleMarkAction.bind(this));
     $(document).on('click', '.list_view_item', this.handleCurrentListChange.bind(this));
   },
   createTemplates: function() {
@@ -85,7 +85,7 @@ application = {
     this.navListsTemplate = Handlebars.compile($('#nav_lists_template').html());
   },
   updatePage: function() {
-    // this.resetModal();
+    this.resetModal();
     this.sortToDos();
     this.displayNavLists();
     this.displayMainList();
@@ -205,12 +205,14 @@ application = {
     this.updatePage();
   },
   handleMarkAction: function(e) {
-    var checked = $(e.target).closest('li').hasClass('completed');
+    if (!$(e.target).hasClass('todo_list_link')) {
+      var checked = $(e.target).closest('li').hasClass('completed');
 
-    if (checked) {
-      this.markIncomplete(e);
-    } else {
-      this.markComplete(e);
+      if (checked) {
+        this.markIncomplete(e);
+      } else {
+        this.markComplete(e);
+      }
     }
   },
   addToDo: function(title, day, month, year, description) {
@@ -299,15 +301,13 @@ application = {
       return alert('Cannot mark as complete as item has not been created yet!');
     }
 
-    if (!$(e.target).hasClass('todo_list_link')) {
       if ($(e.target).attr('class') === 'checkbox') {
         toDoID = $(e.target).closest('li').data('id');
       } else if ($(e.target).attr('class') === 'mark_complete_link') {
         toDoID = $(e.target).closest('div#modal').data('edit-id');
-      } else if ($(e.target).closest('li').hasClass('main_list_item')) {
+      } else if ($(e.target).closest('div').hasClass('main_list_item')) {
         toDoID = $(e.target).closest('li').attr('data-id');
       }
-    }
 
     this.getToDo(toDoID).completed = 'completed';
     this.updatePage();
@@ -381,6 +381,9 @@ application = {
     } else {
       return 0;
     }
+  },
+  resetModal: function() {
+    $('#modal').attr('data-edit-id', '');
   }
 };
 
