@@ -38,7 +38,8 @@ function incrementID() {
 function makeToDo(title, day, month, year, description) {
   var id = getCurrentID();
   incrementID();
-  return Object.create(ToDo).init(title, day, month, year, description, id);
+  var newToDo = Object.create(ToDo).init(title, day, month, year, description, id);
+  return newToDo;
 }
 
 application = {
@@ -75,8 +76,8 @@ application = {
     $('#modal form').on('submit', this.handleModalSubmit.bind(this));
     $(document).on('click', '.trash', this.handleToDoDeletion.bind(this));
     $(document).on('click', '.mark_complete_link', this.markComplete.bind(this));
-    $(document).on('click', '.checkbox', this.handleCheckBox.bind(this));
-    $(document).on('click', 'main li', this.handleCheckBox.bind(this));
+    $(document).on('click', '.checkbox', this.handleMarkAction.bind(this));
+    $(document).on('click', 'main li', this.handleMarkAction.bind(this));
     $(document).on('click', '.list_view_item', this.handleCurrentListChange.bind(this));
   },
   createTemplates: function() {
@@ -203,8 +204,8 @@ application = {
 
     this.updatePage();
   },
-  handleCheckBox: function(e) {
-    var checked = $(e.target).closest('li').attr('class') === 'completed';
+  handleMarkAction: function(e) {
+    var checked = $(e.target).closest('li').hasClass('completed');
 
     if (checked) {
       this.markIncomplete(e);
@@ -220,19 +221,14 @@ application = {
     this.updatePage();
   },
   editToDo: function(title, day, month, year, description, id) {
-    var completed = this.getToDo(id).completed;
-
-    editedToDo = {
-      title: title,
-      day: day,
-      month: month,
-      year: year,
-      description: description,
-      completed: completed,
-      dueDateStr: month + '/' + year,
-      id: id,
-    };
-    this.setToDo(editedToDo, id);
+    var completed = this.getToDo(id);
+    completed.title = title;
+    completed.day = day;
+    completed.month = month;
+    completed.year = year;
+    completed.description = description;
+    completed.id = id;
+    completed.dueDateStr = ToDo.getDueDateStr(month, year);
   },
   setToDo: function(toDo, id) {
     var index;
@@ -303,10 +299,14 @@ application = {
       return alert('Cannot mark as complete as item has not been created yet!');
     }
 
-    if ($(e.target).attr('class') === 'checkbox') {
-      toDoID = $(e.target).closest('li').data('id');
-    } else if ($(e.target).attr('class') === 'mark_complete_link') {
-      toDoID = $(e.target).closest('div#modal').data('edit-id');
+    if (!$(e.target).hasClass('todo_list_link')) {
+      if ($(e.target).attr('class') === 'checkbox') {
+        toDoID = $(e.target).closest('li').data('id');
+      } else if ($(e.target).attr('class') === 'mark_complete_link') {
+        toDoID = $(e.target).closest('div#modal').data('edit-id');
+      } else if ($(e.target).closest('li').hasClass('main_list_item')) {
+        toDoID = $(e.target).closest('li').attr('data-id');
+      }
     }
 
     this.getToDo(toDoID).completed = 'completed';
