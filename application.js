@@ -1,3 +1,6 @@
+// *****************************************************************************
+// Template for toDo object according to OLOO approach and auxiliary functions
+// *****************************************************************************
 var ToDo = {
   title: '',
   day: '',
@@ -42,6 +45,9 @@ function makeToDo(title, day, month, year, description) {
   return newToDo;
 }
 
+// *****************************************************************************
+// Application object
+// *****************************************************************************
 application = {
   stateKey: "toDoApplicationKey",
   state: {
@@ -111,7 +117,7 @@ application = {
     }
 
     $('#main_list_title').text(title);
-    $('#main_list_count').text(this.state.toDos[view].length || '0');
+    $('#main_list_count').text(this.getListCount(view));
     $('main ul').remove();
     $('main').append(toDoListHTML);
   },
@@ -327,10 +333,20 @@ application = {
       return toDo.completed === 'completed';
     });
   },
+  getListCount: function(view) {
+    var list = this.state.toDos[view];
+
+    if(list) {
+      return list.length;
+    } else {
+      return 0;
+    }
+  },
   highlightCurrentView: function() {
     $('.highlighted').removeClass('highlighted');
     var view = this.state.currentListView;
     var query;
+
     if (view === 'No Due Date') {
       query = ("[id='No Due Date']");
     } else {
@@ -338,10 +354,13 @@ application = {
     }
 
     var elem = $(query)[0];
-    if (elem.tagName === 'LI') {
-      $(elem).addClass('highlighted');
-    } else {
-      $(elem).find('h1').addClass('highlighted');
+
+    if (elem !== undefined) {
+      if (elem.tagName === 'LI') {
+        $(elem).addClass('highlighted');
+      } else {
+        $(elem).find('h1').addClass('highlighted');
+      }
     }
   },
   sortToDoList: function(list) {
@@ -362,6 +381,7 @@ application = {
                listLength: self.state.toDos[name].length,
                completed: completed };
     });
+
     return { lists: objects };
   },
   sortDueDateStrs: function(a, b) {
@@ -384,6 +404,18 @@ application = {
   },
   resetModal: function() {
     $('#modal').attr('data-edit-id', '');
+  },
+  resetState: function() {
+    // UTILITY METHOD NOT FOR USE IN APPLICATION CODE
+    this.state = {
+      currentListView: 'all',
+      toDos: {
+        all: [],
+        completed: []
+      }
+    };
+    this.saveState();
+    this.updatePage();
   }
 };
 
