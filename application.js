@@ -111,7 +111,7 @@ application = {
     }
 
     $('#main_list_title').text(title);
-    $('#main_list_count').text(this.state.toDos[view].length);
+    $('#main_list_count').text(this.state.toDos[view].length || '0');
     $('main ul').remove();
     $('main').append(toDoListHTML);
   },
