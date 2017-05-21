@@ -102,6 +102,8 @@ application = {
 
     if (view.match(/\d{2}\/\d{2}completed/)) {
       view = view.slice(0, 5);
+    } else if (view.match(/No Due Datecompleted/)) {
+      view = view.slice(0, 11);
     }
 
     var toDoList = this.state.toDos[view];
@@ -114,6 +116,8 @@ application = {
       title = 'Completed';
     } else if (title.match(/\d{2}\/\d{2}completed/)) {
       title = title.slice(0, 5);
+    } else if (title.match(/No Due Datecompleted/)) {
+      title = title.slice(0, 11);
     }
 
     $('#main_list_title').text(title);
@@ -126,15 +130,8 @@ application = {
     $('#completed ul').remove();
     var self = this;
 
-    // FUNCTION FOR THIS ?
-
-    var listNames = Object.keys(this.state.toDos).filter(function(listName) {
-      return !(['all', 'completed'].includes(listName));
-    });
-
-    var completedListNames = listNames.filter(function(listName) {
-      return self.areAllComplete(self.state.toDos[listName]);
-    });
+    var listNames = this.getListNames();
+    var completedListNames = this.getCompletedListNames();
 
     var allListObject = this.getTemplateListObject(listNames, false);
     var completedListObject = this.getTemplateListObject(completedListNames, true);
@@ -163,6 +160,18 @@ application = {
     } else {
       $('#modal').fadeOut();
     }
+  },
+  getListNames: function() {
+    return Object.keys(this.state.toDos).filter(function(listName) {
+      return !(['all', 'completed'].includes(listName));
+    });
+  },
+  getCompletedListNames: function() {
+    var self = this;
+
+    return this.getListNames().filter(function(listName) {
+      return self.areAllComplete(self.state.toDos[listName]);
+    });
   },
   handleAddToDo: function(e) {
     $('#modal input').val('');
@@ -348,7 +357,9 @@ application = {
     var query;
 
     if (view === 'No Due Date') {
-      query = ("[id='No Due Date']");
+      query = "[id='No Due Date']";
+    } else if (view ===  'No Due Datecompleted') {
+      query = "[id='No Due Datecompleted']";
     } else {
       query = "#" + view.replace("/", "\\/");
     }
