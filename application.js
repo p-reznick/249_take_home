@@ -129,7 +129,7 @@ application = {
     var allListObject = this.getTemplateListObject(listNames, false);
     var completedListObject = this.getTemplateListObject(completedListNames, true);
 
-    $('#all_count').text(listNames.length);
+    $('#all_count').text(this.state.toDos.all.length);
     $('#completed_count').text(completedListNames.length);
 
     $('#all').append(this.navListsTemplate(allListObject));
@@ -198,11 +198,11 @@ application = {
 
     if (editID === '-1') {
       this.addToDo(title, day, month, year, description);
+      this.state.currentListView = 'all';
     } else {
       this.editToDo(title, day, month, year, description, editID);
     }
 
-    this.state.currentListView = 'all';
     this.updatePage();
     this.exitModal();
   },
