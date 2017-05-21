@@ -1,7 +1,7 @@
-<!DOCTYPE=html>
+<!DOCTYPE html>
 <html lang="en-US">
   <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8"/>
     <title>Peter's Todo Lists</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.8/handlebars.min.js"></script>
@@ -14,7 +14,7 @@
         <h1>All Todos <span id="all_count">2</span></h1>
       </div>
       <div id="completed" class="list_view_item">
-        <h1 id="completed">Completed <span id="completed_count">1</span></h1>
+        <h1>Completed <span id="completed_count">1</span></h1>
       </div>
     </nav>
     <main>
@@ -27,7 +27,7 @@
         <dl>
           <dt><label for="title">Title</label></dt>
           <dd><input id="title" type="text" placeholder="Title"></dd>
-          <dt><label for="due_date">Due Date</label></dt>
+          <dt><label>Due Date</label></dt>
           <dd id="date_input_holder">
             <select id="day" name="day">
               <option value='' disabled="disabled" selected="selected">Day</option>
@@ -96,7 +96,7 @@
               <option value="25">2025</option>
             </select>
           </dd>
-          <dt><label for='description'>Description</dt>
+          <dt><label for='description'>Description</label></dt>
           <dd>
             <textarea id="description" name="description" placeholder="Description"></textarea>
           </dd>
@@ -107,27 +107,27 @@
         </div>
       </form>
     </div>
+    <script id="main_list_template" type="text/x-handlebars-template">
+      <ul>
+        {{#each toDos}}
+        <li data-id="{{id}}" class="{{completed}}">
+          <div class="main_list_item">
+            <img class="checkbox" src="https://d3905n0khyu9wc.cloudfront.net/assessment/todo-js/images/checkbox.png"></img>
+            <a class="todo_list_link" href="#">{{title}} - {{dueDateStr}}</a>
+          </div>
+          <div class="trash"</div>
+        </li>
+        {{/each}}
+      </ul>
+    </script>
+    <script id="nav_lists_template" type="text/x-handlebars-template">
+      <ul>
+        {{#each lists}}
+        <li id="{{listName}}{{completed}}" class="{{completed}} list_view_item">
+          <p>{{listName}}<span>{{listLength}}</span></p>
+        </li>
+        {{/each}}
+      </ul>
+    </script>
   </body>
-  <script id="main_list_template" type="text/x-handlebars-template">
-    <ul>
-      {{#each toDos}}
-      <li data-id="{{id}}" class="{{completed}}">
-        <div class="main_list_item">
-          <img class="checkbox" src="https://d3905n0khyu9wc.cloudfront.net/assessment/todo-js/images/checkbox.png"></img>
-          <a class="todo_list_link" href="#">{{title}} - {{dueDateStr}}</a>
-        </div>
-        <div class="trash"</div>
-      </li>
-      {{/each}}
-    </ul>
-  </script>
-  <script id="nav_lists_template" type="text/x-handlebars-template">
-    <ul>
-      {{#each lists}}
-      <li id="{{listName}}{{completed}}" class="{{completed}} list_view_item">
-        <p>{{listName}}<span>{{listLength}}</span></p>
-      </li>
-      {{/each}}
-    </ul>
-  </script>
 </html>

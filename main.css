@@ -3,6 +3,11 @@
 /*General*/
 body {
   font-family: Helvetica, Arial, sans-serif;
+  height: 100%;
+}
+
+html {
+  height: 100%;
 }
 
 .completed p,
@@ -33,6 +38,7 @@ h2 {
 nav {
   display: inline-block;
   float: left;
+  height: 1000px;
   width: 335px;
   background-color: #464f77;
   height: 100%;
