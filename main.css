@@ -113,10 +113,16 @@ nav li {
   color: rgb(179, 179, 179);
 }
 
+.minimized {
+  margin-left: 355px;
+}
+
 main {
-  float: left;
-  padding-left: 20px;
-  width: 60%;
+  /*float: left;*/
+  margin-left: 355px;
+  padding-right: 20px;
+  max-width: 600px;
+  /*width: 60%;*/
 }
 
 main h2,
@@ -133,6 +139,10 @@ main li {
 
 main .trash {
   float: right;
+  width: 10%;
+  height: 100%;
+  background: url("https://d3905n0khyu9wc.cloudfront.net/assessment/todo-js/images/trash.png") no-repeat scroll center transparent;
+  box-sizing: border-box;
   padding: 12px 12px 18px 12px;
   vertical-align: middle;
   cursor: pointer;
@@ -146,16 +156,16 @@ main li {
   border-top: 1px solid #e7e7e7;
 }
 
-main li div {
+main .main_list_item {
   display: inline-block;
   padding: 16px 0 0 20px;
-  width: 94%;
+  width: 90%;
   margin: 0;
   height: 100%;
   box-sizing: border-box;
 }
 
-main li div:hover {
+main .main_list_item:hover {
   background-color: rgba(0,100,205, 0.2);
 }
 
@@ -212,8 +222,9 @@ main span#main_list_count {
 form {
   display: inline-block;
   position: absolute;
+  left: 50%;
   top: 20%;
-  left: 30%;
+  transform: translate(-50%, -20%);
   height: 411px;
   width: 575px;
   background-color: #fff;
@@ -292,6 +303,23 @@ form {
 
 #modal select {
   width: 31%;
+}
+
+/*Media Queries*/
+@media (max-width: 768px) {
+  nav {
+    display: none;
+  }
+  main {
+    margin-left: 20px;
+  }
+  #hamburger {
+    width: 23px;
+    height: 18px;
+    margin: -20px 0 40px 20px;
+    background: url("https://d3905n0khyu9wc.cloudfront.net/assessment/todo-js/images/hamburger.png") no-repeat scroll center transparent;
+    cursor: pointer;
+  }
 }
 
 /*images:*/

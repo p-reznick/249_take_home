@@ -85,6 +85,7 @@ application = {
     $(document).on('click', '.checkbox', this.handleMarkAction.bind(this));
     $(document).on('click', '.main_list_item', this.handleMarkAction.bind(this));
     $(document).on('click', '.list_view_item', this.handleCurrentListChange.bind(this));
+    $('#hamburger').on('click', this.handleHamburger.bind(this));
   },
   createTemplates: function() {
     this.mainListTemplate = Handlebars.compile($('#main_list_template').html());
@@ -109,9 +110,9 @@ application = {
     var toDoList = this.state.toDos[view];
     var toDoListHTML = this.mainListTemplate({ toDos: toDoList });
     var title = this.state.currentListView;
-    console.log(title);
+
     title = this.getPrettifiedTitle(title);
-    console.log(title);
+
     $('#main_list_title').text(title);
     $('#main_list_count').text(this.getListCount(view));
     $('main ul').remove();
@@ -221,6 +222,10 @@ application = {
         this.markComplete(e);
       }
     }
+  },
+  handleHamburger: function() {
+    $('nav').toggle();
+    $('main').toggleClass('minimized');
   },
   addToDo: function(title, day, month, year, description) {
     var newToDo = makeToDo(title, day, month, year, description);
