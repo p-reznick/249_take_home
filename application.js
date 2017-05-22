@@ -39,21 +39,25 @@ application = {
   },
   displayMainList: function() {
     var view = this.currentListView;
+    var completed = false;
 
     if (view.match(/\d{2}\/\d{2}completed/)) {
       view = view.slice(0, 5);
+      completed = true;
     } else if (view.match(/No Due Datecompleted/)) {
       view = view.slice(0, 11);
+      completed = true;
     }
 
-    var toDoList = this.displayListsObject[view];
+    var toDoList = completed ? toDos.getCompletedOnly(this.displayListsObject[view]) :
+                               this.displayListsObject[view];
     var toDoListHTML = this.mainListTemplate({ toDos: toDoList });
     var title = this.currentListView;
 
     title = this.getPrettifiedTitle(title);
 
     $('#main_list_title').text(title);
-    $('#main_list_count').text(toDoList.length);
+    $('#main_list_count').text(toDoList ? toDoList.length : 0);
     $('main ul').remove();
     $('main').append(toDoListHTML);
   },
@@ -92,18 +96,6 @@ application = {
     } else {
       $('#modal').fadeOut();
     }
-  },
-  getListNames: function() {
-    return Object.keys(this.state.toDos).filter(function(listName) {
-      return !(['all', 'completed'].includes(listName));
-    });
-  },
-  getCompletedListNames: function() {
-    var self = this;
-
-    return this.getListNames().filter(function(listName) {
-      return self.areAllComplete(self.state.toDos[listName]);
-    });
   },
   handleAddToDo: function(e) {
     $('#modal input').val('');
@@ -149,7 +141,7 @@ application = {
   handleCurrentListChange: function(e) {
     var newListView = $(e.target).closest('.list_view_item').attr('id');
     this.currentListView = newListView;
-    console.log(newListView);
+
     this.updatePage();
     this.saveView();
   },
@@ -170,41 +162,9 @@ application = {
   },
   addToDo: function(title, day, month, year, description) {
     var newToDo = toDos.makeToDo(title, day, month, year, description);
-    console.log(newToDo);
+
     toDos.addToDo(newToDo);
     toDos.saveToDos();
-  },
-  setToDo: function(toDo, id) {
-    var index;
-    var lists = this.state.toDos.all;
-
-    lists.forEach(function(toDo, idx) {
-      if (toDo.id.toString() === id) {
-        index = idx;
-      }
-    });
-
-    lists[index] = toDo;
-    toDos.saveTodos();
-  },
-  clearSecondaryLists: function() {
-    var allTodos = this.state.toDos['all'];
-    this.state.toDos = {
-      all: allTodos,
-      completed: [],
-    }
-  },
-  distributeToDo: function(toDo) {
-    var lists = this.state.toDos;
-    if (toDo.completed) {
-      lists.completed.push(toDo);
-    }
-
-    if (lists[toDo.dueDateStr]) {
-      toDo.completed === 'completed' ? lists[toDo.dueDateStr].push(toDo) : lists[toDo.dueDateStr].unshift(toDo);
-    } else {
-      (lists[toDo.dueDateStr] = [toDo]);
-    }
   },
   getToDo: function(id) {
     var match;
@@ -281,8 +241,14 @@ application = {
     listNames = listNames.sort(this.sortDueDateStrs);
 
     var objects = listNames.map(function(name) {
+      var list = toDos.getDisplayLists()[name];
+      var listLength;
+
+      listLength = completed ? toDos.getNumberCompleted(list) :
+                               list.length;
+
       return { listName: name,
-               listLength: toDos.getDisplayLists()[name].length,
+               listLength: listLength,
                completed: completed };
     });
 
@@ -332,5 +298,5 @@ application = {
     return localStorage.getItem('249view') || 'all';
   }
 };
-console.log(toDos);
+
 $(application.init.bind(application));

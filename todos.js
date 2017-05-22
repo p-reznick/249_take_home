@@ -161,6 +161,16 @@ var toDos = {
       return toDo.completed === 'completed';
     });
   },
+  getNumberCompleted: function(list) {
+    return list.reduce(function(total, toDo) {
+      return toDo.completed === 'completed' ? total + 1 : total;
+    }, 0);
+  },
+  getCompletedOnly: function(list) {
+    return list.filter(function(toDo) {
+      return toDo.completed === 'completed';
+    });
+  },
   getListNames: function() {
     var allNames = Object.keys(this.getDisplayLists());
     return allNames.filter(function(name) {
