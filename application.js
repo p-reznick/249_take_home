@@ -1,76 +1,12 @@
 // *****************************************************************************
-// Template for toDo object according to OLOO approach and auxiliary functions
-// *****************************************************************************
-var ToDo = {
-  title: '',
-  day: '',
-  month: '',
-  year: '',
-  description: '',
-  completed: '',
-  dueDateStr: '',
-  getDueDateStr: function(month, year) {
-    if (month !== null && year !== null) {
-      return (month + '/' + year);
-    } else {
-      return "No Due Date";
-    }
-  },
-  init: function(title, day, month, year, description, id) {
-    this.title = title;
-    this.day = day;
-    this.month = month;
-    this.year = year;
-    this.description = description;
-    this.completed = '';
-    this.dueDateStr = this.getDueDateStr(month, year);
-    this.id = id;
-    return this;
-  }
-}
-
-function getCurrentID() {
-  return parseInt(localStorage.getItem('toDoListID'), 10) || 0;
-}
-
-function incrementID() {
-  var id = getCurrentID();
-  localStorage.setItem('toDoListID', id + 1);
-}
-
-function makeToDo(title, day, month, year, description) {
-  var id = getCurrentID();
-  incrementID();
-  var newToDo = Object.create(ToDo).init(title, day, month, year, description, id);
-  return newToDo;
-}
-
-// *****************************************************************************
-// Application object
+// Application object handles displaying page and responding to user actions
 // *****************************************************************************
 application = {
-  stateKey: "toDoApplicationKey",
-  state: {
-    currentListView: 'all',
-    toDos: {
-      all: [],
-      completed: []
-    }
-  },
-  saveState: function() {
-    var stateStr = JSON.stringify(this.state);
-    localStorage.setItem(this.stateKey, stateStr);
-  },
-  getState: function() {
-    return JSON.parse(localStorage.getItem(this.stateKey));
-  },
+  currentListView: 'all',
+  displayListsObject: undefined,
   init: function() {
-    localState = this.getState();
-
-    if (localState) {
-      this.state = localState;
-    }
-
+    this.displayListsObject = toDos.getDisplayLists();
+    this.currentListView = this.getSavedView();
     this.addEventListeners();
     this.createTemplates();
     this.updatePage();
@@ -93,13 +29,16 @@ application = {
   },
   updatePage: function() {
     this.resetModal();
-    this.sortToDos();
+    this.updateDisplayListsObject();
     this.displayNavLists();
     this.displayMainList();
     this.highlightCurrentView();
   },
+  updateDisplayListsObject: function() {
+    this.displayListsObject = toDos.getDisplayLists();
+  },
   displayMainList: function() {
-    var view = this.state.currentListView;
+    var view = this.currentListView;
 
     if (view.match(/\d{2}\/\d{2}completed/)) {
       view = view.slice(0, 5);
@@ -107,14 +46,14 @@ application = {
       view = view.slice(0, 11);
     }
 
-    var toDoList = this.state.toDos[view];
+    var toDoList = this.displayListsObject[view];
     var toDoListHTML = this.mainListTemplate({ toDos: toDoList });
-    var title = this.state.currentListView;
+    var title = this.currentListView;
 
     title = this.getPrettifiedTitle(title);
 
     $('#main_list_title').text(title);
-    $('#main_list_count').text(this.getListCount(view));
+    $('#main_list_count').text(toDoList.length);
     $('main ul').remove();
     $('main').append(toDoListHTML);
   },
@@ -123,13 +62,13 @@ application = {
     $('#completed ul').remove();
     var self = this;
 
-    var listNames = this.getListNames();
-    var completedListNames = this.getCompletedListNames();
+    var listNames = toDos.getListNames();
+    var completedListNames = toDos.getCompletedListNames();
 
     var allListObject = this.getTemplateListObject(listNames, false);
     var completedListObject = this.getTemplateListObject(completedListNames, true);
 
-    $('#all_count').text(this.state.toDos.all.length);
+    $('#all_count').text(toDos.allToDos.length);
     $('#completed_count').text(completedListNames.length);
 
     $('#all').append(this.navListsTemplate(allListObject));
@@ -175,7 +114,7 @@ application = {
   handleEditToDo: function(e) {
     var toDoID = $(e.target).closest('li').data('id');
     $modal = $('#modal');
-    var original = this.getToDo(toDoID);
+    var original = toDos.getToDo(toDoID);
 
     $modal.find('#title').val(original.title);
     $modal.find('#day').val(original.day);
@@ -197,10 +136,11 @@ application = {
     var description = $modal.find('#description').val();
 
     if (editID === '-1') {
-      this.addToDo(title, day, month, year, description);
-      this.state.currentListView = 'all';
+      var newToDo = toDos.makeToDo(title, day, month, year, description);
+      toDos.addToDo(newToDo);
+      this.currentListView = 'all';
     } else {
-      this.editToDo(title, day, month, year, description, editID);
+      toDos.editToDo(title, day, month, year, description, editID);
     }
 
     this.updatePage();
@@ -208,9 +148,10 @@ application = {
   },
   handleCurrentListChange: function(e) {
     var newListView = $(e.target).closest('.list_view_item').attr('id');
-    this.state.currentListView = newListView;
+    this.currentListView = newListView;
 
     this.updatePage();
+    this.saveView();
   },
   handleMarkAction: function(e) {
     if (!$(e.target).hasClass('todo_list_link')) {
@@ -228,21 +169,10 @@ application = {
     $('main').toggleClass('minimized');
   },
   addToDo: function(title, day, month, year, description) {
-    var newToDo = makeToDo(title, day, month, year, description);
-
-    this.state.toDos.all.push(newToDo);
-    this.saveState();
-    this.updatePage();
-  },
-  editToDo: function(title, day, month, year, description, id) {
-    var completed = this.getToDo(id);
-    completed.title = title;
-    completed.day = day;
-    completed.month = month;
-    completed.year = year;
-    completed.description = description;
-    completed.id = id;
-    completed.dueDateStr = ToDo.getDueDateStr(month, year);
+    var newToDo = toDos.makeToDo(title, day, month, year, description);
+    console.log(newToDo);
+    toDos.addToDo(newToDo);
+    toDos.saveToDos();
   },
   setToDo: function(toDo, id) {
     var index;
@@ -255,13 +185,7 @@ application = {
     });
 
     lists[index] = toDo;
-    this.sortToDos();
-  },
-  sortToDos: function() {
-    this.clearSecondaryLists();
-    this.state.toDos.all.forEach(this.distributeToDo.bind(this));
-    this.state.toDos.all = this.sortToDoList(this.state.toDos.all);
-    this.saveState();
+    toDos.saveTodos();
   },
   clearSecondaryLists: function() {
     var allTodos = this.state.toDos['all'];
@@ -295,14 +219,7 @@ application = {
   },
   handleToDoDeletion: function(e) {
     var toDoID = $(e.target).closest('li').data('id');
-    this.deleteToDo(toDoID);
-  },
-  deleteToDo: function(id) {
-    this.state.toDos.all = this.state.toDos.all.filter(function(toDo) {
-      return toDo.id.toString() !== id.toString();
-    });
-
-    this.saveState();
+    toDos.deleteToDo(toDoID);
     this.updatePage();
   },
   markComplete: function(e) {
@@ -320,7 +237,7 @@ application = {
         toDoID = $(e.target).closest('li').attr('data-id');
       }
 
-      this.getToDo(toDoID).completed = 'completed';
+      toDos.markComplete(toDoID);
       this.updatePage();
       this.exitModal();
     }
@@ -330,27 +247,13 @@ application = {
     if (e.target.tagName !== 'A') {
       var toDoID = $(e.target).closest('li').data('id');
 
-      this.getToDo(toDoID).completed = '';
+      toDos.markIncomplete(toDoID);
       this.updatePage();
-    }
-  },
-  areAllComplete: function(list) {
-    return list.every(function(toDo) {
-      return toDo.completed === 'completed';
-    });
-  },
-  getListCount: function(view) {
-    var list = this.state.toDos[view];
-
-    if(list) {
-      return list.length;
-    } else {
-      return 0;
     }
   },
   highlightCurrentView: function() {
     $('.highlighted').removeClass('highlighted');
-    var view = this.state.currentListView;
+    var view = this.currentListView;
     var query;
 
     if (view === 'No Due Date') {
@@ -371,13 +274,6 @@ application = {
       }
     }
   },
-  sortToDoList: function(list) {
-    var newList = [];
-    list.forEach(function(toDo) {
-      toDo.completed === 'completed' ? newList.push(toDo) : newList.unshift(toDo);
-    });
-    return newList;
-  },
   getTemplateListObject: function(listNames, completed) {
     var completed = completed ? 'completed' : '';
     var self = this;
@@ -386,7 +282,7 @@ application = {
 
     var objects = listNames.map(function(name) {
       return { listName: name,
-               listLength: self.state.toDos[name].length,
+               listLength: toDos.getDisplayLists()[name].length,
                completed: completed };
     });
 
@@ -428,18 +324,13 @@ application = {
   resetModal: function() {
     $('#modal').attr('data-edit-id', '');
   },
-  resetState: function() {
-    // UTILITY METHOD NOT FOR USE IN APPLICATION CODE
-    this.state = {
-      currentListView: 'all',
-      toDos: {
-        all: [],
-        completed: []
-      }
-    };
-    this.saveState();
-    this.updatePage();
+  saveView: function() {
+    var view = this.currentListView;
+    localStorage.setItem('249view', view);
+  },
+  getSavedView: function() {
+    return localStorage.getItem('249view') || 'all';
   }
 };
-
+console.log(toDos);
 $(application.init.bind(application));
