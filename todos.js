@@ -140,8 +140,8 @@ var toDos = {
     }
 
     this.allToDos.forEach(function(toDo) {
-      if (toDo.complete) {
-        listObj.push(toDo);
+      if (toDo.completed === 'completed') {
+        listObj.completed.push(toDo);
       }
 
       var dueDateStr = toDo.dueDateStr;

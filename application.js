@@ -69,7 +69,7 @@ application = {
     var completedListObject = this.getTemplateListObject(completedListNames, true);
 
     $('#all_count').text(toDos.allToDos.length);
-    $('#completed_count').text(completedListNames.length);
+    $('#completed_count').text(toDos.getDisplayLists()['completed'].length);
 
     $('#all').append(this.navListsTemplate(allListObject));
     $('#completed').append(this.navListsTemplate(completedListObject));
@@ -149,7 +149,7 @@ application = {
   handleCurrentListChange: function(e) {
     var newListView = $(e.target).closest('.list_view_item').attr('id');
     this.currentListView = newListView;
-
+    console.log(newListView);
     this.updatePage();
     this.saveView();
   },
@@ -165,7 +165,7 @@ application = {
     }
   },
   handleHamburger: function() {
-    $('nav').toggle();
+    $('nav').toggleClass('visible');
     $('main').toggleClass('minimized');
   },
   addToDo: function(title, day, month, year, description) {

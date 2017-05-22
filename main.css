@@ -114,6 +114,10 @@ nav li {
   padding-left: 130px;
 }
 
+.visible {
+  display: inline-block;
+}
+
 /*Main*/
 .completed a {
   color: rgb(179, 179, 179);
@@ -317,6 +321,9 @@ form {
 }
 
 /*Media Queries*/
+@media (min-width: 769px) {
+  nav { display: inline-block; }
+}
 @media (max-width: 768px) {
   nav {
     display: none;
