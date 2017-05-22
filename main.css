@@ -149,7 +149,7 @@ main li {
 
 main .trash {
   float: right;
-  width: 10%;
+  width: 6%;
   height: 100%;
   background: url("https://d3905n0khyu9wc.cloudfront.net/assessment/todo-js/images/trash.png") no-repeat scroll center transparent;
   box-sizing: border-box;
@@ -169,7 +169,7 @@ main li {
 main .main_list_item {
   display: inline-block;
   padding: 16px 0 0 20px;
-  width: 90%;
+  width: 93%;
   margin: 0;
   height: 100%;
   box-sizing: border-box;

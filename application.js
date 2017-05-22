@@ -49,8 +49,9 @@ application = {
       completed = true;
     }
 
-    var toDoList = completed ? toDos.getCompletedOnly(this.displayListsObject[view]) :
-                               this.displayListsObject[view];
+    var list = this.displayListsObject[view];
+    var toDoList = (completed ? toDos.getCompletedOnly(list) :
+                               list);
     var toDoListHTML = this.mainListTemplate({ toDos: toDoList });
     var title = this.currentListView;
 
@@ -184,23 +185,29 @@ application = {
   },
   markComplete: function(e) {
     e.preventDefault();
-    var toDoID;
 
     if ($('#modal').attr('data-edit-id') === '-1') {
       alert('Cannot mark as complete as item has not been created yet!');
     } else {
-      if ($(e.target).attr('class') === 'checkbox') {
-        toDoID = $(e.target).closest('li').data('id');
-      } else if ($(e.target).attr('class') === 'mark_complete_link') {
-        toDoID = $(e.target).closest('div#modal').data('edit-id');
-      } else if ($(e.target).closest('div').hasClass('main_list_item')) {
-        toDoID = $(e.target).closest('li').attr('data-id');
-      }
+      toDoID = this.getMarkedID(e);
 
       toDos.markComplete(toDoID);
       this.updatePage();
       this.exitModal();
     }
+  },
+  getMarkedID: function(e) {
+    var toDoID;
+
+    if ($(e.target).attr('class') === 'checkbox') {
+      toDoID = $(e.target).closest('li').data('id');
+    } else if ($(e.target).attr('class') === 'mark_complete_link') {
+      toDoID = $(e.target).closest('div#modal').data('edit-id');
+    } else if ($(e.target).closest('div').hasClass('main_list_item')) {
+      toDoID = $(e.target).closest('li').attr('data-id');
+    }
+
+    return toDoID;
   },
   markIncomplete: function(e) {
     e.preventDefault();

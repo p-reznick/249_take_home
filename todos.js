@@ -77,8 +77,8 @@ var toDos = {
     var index;
 
     this.allToDos.forEach(function(toDo, idx) {
-      if (toDo.id === id) {
-        index == idx;
+      if (toDo.id.toString() === id.toString()) {
+        index = idx;
       }
     });
 
@@ -167,9 +167,15 @@ var toDos = {
     }, 0);
   },
   getCompletedOnly: function(list) {
-    return list.filter(function(toDo) {
-      return toDo.completed === 'completed';
-    });
+    if(list) {
+      var completed = list.filter(function(toDo) {
+        return toDo.completed === 'completed';
+      });
+
+      return completed;
+    } else {
+      return [];
+    }
   },
   getListNames: function() {
     var allNames = Object.keys(this.getDisplayLists());
